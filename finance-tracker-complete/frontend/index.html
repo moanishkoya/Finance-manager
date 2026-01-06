@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceOS</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div id="root">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-mark">F</div>
+                <span>FinanceOS</span>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-target="dashboard">
+                    <i class="fa-solid fa-grid-2"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item" data-target="wallet">
+                    <i class="fa-solid fa-wallet"></i> Wallet
+                </a>
+                <a href="#" class="nav-item" data-target="analytics">
+                    <i class="fa-solid fa-chart-simple"></i> Analytics
+                </a>
+                <a href="#" class="nav-item" onclick="exportCSV()">
+                    <i class="fa-solid fa-cloud-arrow-down"></i> Export
+                </a>
+            </nav>
+
+            <div class="user-profile">
+                <img src="https://ui-avatars.com/api/?name=User&background=27272a&color=fff" alt="User">
+                <div class="user-text">
+                    <p>Demo User</p>
+                    <span>Pro Plan</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="app-content">
+            
+            <header class="top-bar">
+                <div class="breadcrumbs">
+                    <span class="text-muted">App</span>
+                    <span class="separator">/</span>
+                    <span id="pageTitle" class="text-white">Dashboard</span>
+                </div>
+                <button class="btn-primary" onclick="openModal()">
+                    <i class="fa-solid fa-plus"></i> Add Transaction
+                </button>
+            </header>
+
+            <div id="view-dashboard" class="view-section active">
+                <section class="stats-container">
+                    <div class="stat-card">
+                        <span class="stat-label">Total Balance</span>
+                        <h2 class="stat-value" id="totalAmount">₹0.00</h2>
+                        <div class="stat-trend positive">
+                            <i class="fa-solid fa-arrow-trend-up"></i> <span>Live</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Income</span>
+                        <h2 class="stat-value text-success" id="incomeAmount">₹0.00</h2>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Expenses</span>
+                        <h2 class="stat-value text-danger" id="expenseAmount">₹0.00</h2>
+                    </div>
+                </section>
+
+                <section class="dashboard-grid">
+                    <div class="card chart-card">
+                        <div class="card-header"><h3>Cash Flow Trend</h3></div>
+                        <div class="chart-area">
+                            <canvas id="mainChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="card list-card">
+                        <div class="card-header"><h3>Recent Activity</h3></div>
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Date</th>
+                                        <th class="text-right">Amount</th>
+                                        <th></th> </tr>
+                                </thead>
+                                <tbody id="recentList">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="view-wallet" class="view-section hidden">
+                <div class="card full-height-card">
+                    <div class="card-header">
+                        <h3>Full Transaction History</h3>
+                        <div class="search-bar">
+                            <i class="fa-solid fa-search"></i>
+                            <input type="text" id="searchInput" placeholder="Search transactions..." onkeyup="filterWallet()">
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th>Date</th>
+                                    <th class="text-right">Amount</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="walletList">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-analytics" class="view-section hidden">
+                <div class="analytics-grid">
+                    <div class="card">
+                        <div class="card-header"><h3>Expense by Category</h3></div>
+                        <div class="chart-area"><canvas id="doughnutChart"></canvas></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><h3>Income vs Expense</h3></div>
+                        <div class="chart-area"><canvas id="barChart"></canvas></div>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 1rem;">
+                    <div class="card-header"><h3>Expense Trend Over Time</h3></div>
+                    <div class="chart-area" style="height: 300px;">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div id="modal" class="modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-head">
+                <h3>New Transaction</h3>
+                <button class="icon-btn" onclick="closeModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form id="expenseForm">
+                <div class="form-group">
+                    <label>Description</label>
+                    <input id="descInput" type="text" placeholder="e.g. Grocery Shopping" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <input id="amountInput" type="number" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select id="typeInput">
+                            <option value="EXPENSE">Expense</option>
+                            <option value="INCOME">Income</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="categoryInput" required>
+                            <option value="" disabled selected>Select Category</option>
+                            <option value="Food">Food</option>
+                            <option value="Transport">Transport</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Health">Health</option>
+                            <option value="Shopping">Shopping</option>
+                            <option value="Others">Others</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input id="dateInput" type="date" required>
+                    </div>
+                </div>
+
+                <div class="modal-foot">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

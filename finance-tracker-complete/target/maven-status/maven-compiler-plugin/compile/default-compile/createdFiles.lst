@@ -1,0 +1,6 @@
+com\expensetracker\FinanceTrackerApplication.class
+com\expensetracker\entity\TransactionType.class
+com\expensetracker\controller\TransactionController.class
+com\expensetracker\repository\TransactionRepository.class
+com\expensetracker\service\TransactionService.class
+com\expensetracker\entity\Transaction.class
